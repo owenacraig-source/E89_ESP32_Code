@@ -31,6 +31,7 @@ portMUX_TYPE isrMux = portMUX_INITIALIZER_UNLOCKED;
 void IRAM_ATTR handleInterrupt() {
   uint32_t now = millis();
 
+  // spinlock to protect shared variables
   portENTER_CRITICAL_ISR(&isrMux);
   if (now - lastInterruptMs >= DEBOUNCE_MS) {
     lastInterruptMs = now;
@@ -67,7 +68,7 @@ void loop() {
   uint32_t count     = 0;
   uint32_t timeMs    = 0;
 
-  // Safely read and clear the shared variables
+  // spinlock to protect shared variables
   portENTER_CRITICAL(&isrMux);
   if (interruptFlag) {
     interruptFlag = false;
